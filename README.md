@@ -90,8 +90,10 @@ Contracts using the fixed supply model hold tokens and distribute them over a se
   </tr>
 </table>
 
-$$R = n\cdot\left(\left(\frac{t-t_x}{i}-\frac{(t-t_x)\%i}{i}\right)\cdot\left(s\div\frac{t_b-t_a}{i}\div n_t\right)\right)$$
+$$R = n\cdot\left(\left(\frac{t-t_x}{i}-\frac{(t-t_x)\mod i}{i}\right)\cdot\left(s\div\frac{t_b-t_a}{i}\div n_t\right)\right)$$
 
 ### Inflationary Model
 
 An inflationary model is not supported if your distributed rewards are in $STARS. This model requires the instantiator to be the admin of a tokenfactory token.
+
+When using an inflationary model, the contract will mint a set amount of tokens per interval, splitting it evenly between tokens staked.
