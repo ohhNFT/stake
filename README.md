@@ -12,8 +12,8 @@ flowchart
   C{{Bad Kid #1234}} -- Deposit --> D(Vault);
   end
 
-  B -.-> E;
-  D -.-> E;
+  B -.- E;
+  D -.- E;
 
   subgraph Stake Contract
   E([Distribute Rewards]) --> F & G;
