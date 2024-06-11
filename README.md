@@ -33,7 +33,7 @@ Both token lockup contracts use a 14-day lockup period by default. This can be m
 
 ```json
 {
-  "lockup_interval": 0,
+  "lockup_interval": 36000,
   "collections": ["stars1..."], // Used by SG721 Lockup
   "token": "ustars" // Used by Native/TF Lockup
 }
@@ -53,9 +53,6 @@ Contracts using the fixed supply model hold tokens and distribute them over a se
   <tr>
   <td>
     <table>
-      <li>
-        <b><i>n</i></b> - # of tokens locked
-      </li>
       <li>
         <b><i>t<sub>x</sub></i></b> - time of last claim
       </li>
@@ -90,10 +87,51 @@ Contracts using the fixed supply model hold tokens and distribute them over a se
   </tr>
 </table>
 
-$$R = n\cdot\left(\left(\frac{t-t_x}{i}-\frac{(t-t_x)\mod i}{i}\right)\cdot\left(s\div\frac{t_b-t_a}{i}\div n_t\right)\right)$$
+$$R = \left(\frac{t-t_x}{i}-\frac{(t-t_x)\mod i}{i}\right)\cdot\left(s\div\frac{t_b-t_a}{i}\div n_t\right)$$
 
 ### Inflationary Model
 
 An inflationary model is not supported if your distributed rewards are in $STARS. This model requires the instantiator to be the admin of a tokenfactory token.
 
 When using an inflationary model, the contract will mint a set amount of tokens per interval, splitting it evenly between tokens staked.
+
+<table>
+  <tr>
+    <th>User</th>
+    <th>Global</th>
+  </tr>
+  <tr>
+  <td>
+    <table>
+      <li>
+        <b><i>t<sub>x</sub></i></b> - time of last claim
+      </li>
+    </table>
+  </td>
+  <td>
+    <table>
+      <td>
+        <li>
+          <b><i>s</i></b> - reward per interval
+        </li>
+        <li>
+          <b><i>i</i></b> - distribution interval
+        </li>
+        <li>
+          <b><i>n<sub>t</sub></i></b> - total tokens locked
+        </li>
+      </td>
+      <td>
+      <li>
+        <b><i>t</i></b> - current time
+      </li>
+      <li>
+        <b><i>t<sub>a</i></b> - start time
+      </li>
+    </td>
+    </table>
+  </td>
+  </tr>
+</table>
+
+$$R = \frac{s}{n_t}\left(\frac{t-t_x}{i}-\frac{(t-t_x)\mod i}{i}\right)$$
