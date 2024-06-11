@@ -136,15 +136,18 @@ When using an inflationary model, the contract will mint a set amount of tokens 
 
 $$R = \frac{s}{n_t}\cdot\left(\frac{t-t_x}{i}-\frac{(t-t_x)\mod i}{i}\right)$$
 
+## Claiming Rewards
+
+Rewards must be claimed manually by the user. For SG721-based setups, **users will have to claim rewards for each NFT manually**. This can be facilitated by the frontend by grouping transactions for each of the tokens together.
+
 ## Storage
 
 ### Native/TF Lockup
 
-Users are stored individually.
+Key is of type `Addr`
 
 ```rust
 {
-  address: Addr,
   amount: Uint128,
   locked_until: Timestamp
 }
@@ -152,24 +155,21 @@ Users are stored individually.
 
 ### SG721 Lockup
 
-NFTs are stored individually.
+Key is of type `(Addr, u64)`
 
 ```rust
 {
   owner: Addr,
-  collection: Addr,
-  token_id: u64,
   locked_until: Timestamp
 }
 ```
 
 ### Stake Contract
 
-Users are stored individually.
+Key is of type `Addr` or `(Addr, u64)`, depending on the lockup contract used.
 
 ```rust
 {
-  address: Addr,
   last_claim: Timestamp
 }
 ```
