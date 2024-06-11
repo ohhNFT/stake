@@ -134,4 +134,42 @@ When using an inflationary model, the contract will mint a set amount of tokens 
   </tr>
 </table>
 
-$$R = \frac{s}{n_t}\left(\frac{t-t_x}{i}-\frac{(t-t_x)\mod i}{i}\right)$$
+$$R = \frac{s}{n_t}\cdot\left(\frac{t-t_x}{i}-\frac{(t-t_x)\mod i}{i}\right)$$
+
+## Storage
+
+### Native/TF Lockup
+
+Users are stored individually.
+
+```rust
+{
+  address: Addr,
+  amount: Uint128,
+  locked_until: Timestamp
+}
+```
+
+### SG721 Lockup
+
+NFTs are stored individually.
+
+```rust
+{
+  address: Addr,
+  collection: Addr,
+  token_id: u64,
+  locked_until: Timestamp
+}
+```
+
+### Stake Contract
+
+Users are stored individually.
+
+```rust
+{
+  address: Addr,
+  last_claim: Timestamp
+}
+```
