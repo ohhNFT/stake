@@ -31,7 +31,7 @@ Both native/tokenfactory tokens and SG721 (NFT) tokens can be used with the stak
 
 Both token lockup contracts use a 14-day lockup period by default. This can be modified by setting a custom value to the `lockup_interval` value within the instantiate message.
 
-```json
+```js
 {
   "lockup_interval": 36000,
   "collections": ["stars1..."], // Used by SG721 Lockup
