@@ -156,7 +156,7 @@ NFTs are stored individually.
 
 ```rust
 {
-  address: Addr,
+  owner: Addr,
   collection: Addr,
   token_id: u64,
   locked_until: Timestamp
