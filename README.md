@@ -45,8 +45,6 @@ Both token lockup contracts use a 14-day lockup period by default. This can be m
 
 Contracts using the fixed supply model hold tokens and distribute them over a set period of time. For example, if 100 tokens are to be distributed over 10 days in 1 day intervals, 10 tokens will be available to be claimed each day. If there are 5 tokens staked in the lockup contract, each of their owners will be able to claim 2 tokens per token staked.
 
-$$R = n\cdot\left(\left(\frac{t-t_x}{i}-\frac{(t-t_x)\%i}{i}\right)\cdot\left(s\div\frac{t_b-t_a}{i}\div n_t\right)\right)$$
-
 <table>
   <tr>
     <th>User</th>
@@ -91,6 +89,8 @@ $$R = n\cdot\left(\left(\frac{t-t_x}{i}-\frac{(t-t_x)\%i}{i}\right)\cdot\left(s\
   </td>
   </tr>
 </table>
+
+$$R = n\cdot\left(\left(\frac{t-t_x}{i}-\frac{(t-t_x)\%i}{i}\right)\cdot\left(s\div\frac{t_b-t_a}{i}\div n_t\right)\right)$$
 
 ### Inflationary Model
 
