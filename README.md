@@ -25,6 +25,14 @@ flowchart
   end
 ```
 
+## Usecase
+
+**OhhNFT On-Chain Stake** allows NFT communities to engage their users by rewarding them for holding their NFTs or tokens. The contract allows you to:
+
+- Mint new tokenfactory tokens periodically as a proof-of-loyalty token
+- Distribute incentives in native tokens such as $STARS to your holders
+- Query staked NFTs per user as a metric of voting power for your NFT DAO
+
 ## Token Lockup
 
 Both native/tokenfactory tokens and SG721 (NFT) tokens can be used with the staking contract. Depending on your needs, you can deploy either the **Native/TF Lockup** contract or the **SG721 Lockup** contract and link it to the Stake contract.
