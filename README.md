@@ -163,11 +163,11 @@ Key is of type `Addr`
 
 ### SG721 Lockup
 
-Key is of type `(Addr, u64)`
-
 ```rust
 {
   owner: Addr,
+  collection_address: Addr,
+  token_id: String,
   locked_until: Timestamp
 }
 ```
