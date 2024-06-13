@@ -118,7 +118,7 @@ fn try_query_config() {
 }
 
 #[test]
-fn try_lockup_cw721() {
+fn try_deposit_cw721() {
     let mut router = setup_contracts();
 
     let user = Addr::unchecked(USER);
@@ -169,9 +169,7 @@ fn try_withdraw_cw721() {
 
     assert_eq!(
         err.downcast::<StdError>().unwrap(),
-        StdError::GenericErr {
-            msg: "Lockup period has not passed".to_string()
-        }
+        StdError::generic_err("Lockup period has not passed")
     );
 
     add_block_time(&mut router, 3700);
@@ -182,9 +180,7 @@ fn try_withdraw_cw721() {
 
     assert_eq!(
         err.downcast::<StdError>().unwrap(),
-        StdError::GenericErr {
-            msg: "Sender is not the owner of the NFT".to_string()
-        }
+        StdError::generic_err("Sender is not the owner of the NFT")
     );
 
     router

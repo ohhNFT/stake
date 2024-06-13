@@ -81,6 +81,7 @@ impl Sg721LockupContract {
 
         Ok(Response::new()
             .add_attribute("method", "update_admin")
+            .add_attribute("contract_address", ctx.env.contract.address.to_string())
             .add_attribute("old_admin", old_admin.to_string())
             .add_attribute("new_admin", admin.to_string()))
     }
@@ -113,6 +114,7 @@ impl Sg721LockupContract {
 
         Ok(Response::new()
             .add_attribute("method", "update_config")
+            .add_attribute("contract_address", ctx.env.contract.address.to_string())
             .add_attribute("lockup_interval", lockup_interval.to_string())
             .add_attribute(
                 "collections",
