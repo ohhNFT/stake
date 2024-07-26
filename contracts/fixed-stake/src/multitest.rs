@@ -179,6 +179,9 @@ fn add_block_time(router: &mut App, seconds: u64) {
 #[test]
 fn proper_native_initialization() {
     setup_native_contracts();
+    println!("{:?}", Timestamp::from_seconds(3600).to_string());
+    println!("{:?}", Timestamp::from_seconds(1721962842).to_string());
+    println!("{:?}", Timestamp::from_seconds(1721962842).plus_days(7).to_string())
 }
 
 #[test]
