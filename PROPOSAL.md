@@ -62,5 +62,4 @@ Stake contracts linked to a Native Lockup contract only require users to provide
 a37995020e9af393f288ea18fc758d4720ca595f404f492de63ffc553be0bdea  cw721_lockup.wasm
 61434b3c799a4825013afa9fdae60b376955f952864fe47e25f01799024d08f4  fixed_stake.wasm
 dbc5ab5a58be5c09c8393dd667fa5a6f66f31b7366964912608da1895fb87894  native_lockup.wasm
-
 ```
