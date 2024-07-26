@@ -1,0 +1,37 @@
+[package]
+name = "fixed-stake"
+version.workspace = true
+edition.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+
+exclude = [
+    "contract.wasm",
+    "hash.txt",
+]
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "schema"
+path = "src/bin/schema.rs"
+doc  = false
+
+[dependencies]
+sylvia = { workspace = true }
+cosmwasm-schema = { workspace = true }
+cosmwasm-std = { workspace = true, features = ["staking"] }
+cw-storage-plus = { workspace = true }
+
+native-lockup = { path = "../native-lockup" }
+cw721-lockup = { path = "../cw721-lockup" }
+
+serde = { workspace = true }
+schemars = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+cw721-base = "0.18.0"
+cw-multi-test = { workspace = true }

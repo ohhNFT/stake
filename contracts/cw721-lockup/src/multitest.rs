@@ -53,7 +53,7 @@ fn setup_contracts() -> App {
         .instantiate_contract(cw721_id, admin.clone(), &msg, &[], "CW721", None)
         .unwrap();
 
-    // Set up Sg721Lockup contract
+    // Set up Cw721Lockup contract
     let lockup_id = router.store_code(contract_lockup());
     let msg = crate::contract::InstantiateMsg {
         lockup_interval: Timestamp::from_seconds(3600),

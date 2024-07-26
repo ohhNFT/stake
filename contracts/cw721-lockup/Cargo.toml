@@ -1,5 +1,5 @@
 [package]
-name = "sg721-lockup"
+name = "cw721-lockup"
 version.workspace = true
 edition.workspace = true
 homepage.workspace = true

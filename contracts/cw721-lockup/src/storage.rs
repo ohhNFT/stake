@@ -7,6 +7,7 @@ pub struct Lockup {
     pub owner: Addr,
     pub collection_address: Addr,
     pub token_id: String,
+    pub locked_since: Timestamp,
     pub locked_until: Timestamp,
 }
 
@@ -15,12 +16,14 @@ impl Lockup {
         owner: Addr,
         collection_address: Addr,
         token_id: String,
+        locked_since: Timestamp,
         locked_until: Timestamp,
     ) -> Self {
         Self {
             owner,
             collection_address,
             token_id,
+            locked_since,
             locked_until,
         }
     }

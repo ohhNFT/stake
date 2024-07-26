@@ -9,10 +9,10 @@ use sylvia::{contract, entry_points};
 
 use cw721::{Cw721ExecuteMsg, Cw721QueryMsg, OwnerOfResponse as Cw721OwnerOfResponse};
 
-use crate::msg::{ConfigResponse, CountResponse, LockupsReponse};
+use crate::msg::{ConfigResponse, ContractTypeResponse, CountResponse, LockupsReponse};
 use crate::storage::{Lockup, LockupIndexes};
 
-pub struct Sg721LockupContract {
+pub struct Cw721LockupContract {
     pub(crate) admin: Item<'static, Addr>,
     pub(crate) lockup_interval: Item<'static, Timestamp>,
     pub(crate) collections: Item<'static, Vec<Addr>>,
@@ -21,7 +21,7 @@ pub struct Sg721LockupContract {
 
 #[entry_points]
 #[contract]
-impl Sg721LockupContract {
+impl Cw721LockupContract {
     pub const fn new() -> Self {
         let indexes = LockupIndexes {
             token: MultiIndex::new(
@@ -166,6 +166,7 @@ impl Sg721LockupContract {
             owner.clone(),
             collection_address.clone(),
             token_id.clone(),
+            ctx.env.block.time,
             locked_until.clone(),
         );
 
@@ -243,8 +244,15 @@ impl Sg721LockupContract {
         let count = self
             .lockup
             .keys(ctx.deps.storage, None, None, cosmwasm_std::Order::Ascending)
-            .count() as i32;
+            .count() as u128;
         Ok(CountResponse { count })
+    }
+
+    #[msg(query)]
+    fn contract_type(&self, _ctx: QueryCtx) -> StdResult<ContractTypeResponse> {
+        Ok(ContractTypeResponse {
+            contract_type: "cw721".to_string(),
+        })
     }
 
     #[msg(query)]

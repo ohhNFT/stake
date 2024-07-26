@@ -1,5 +1,5 @@
 use cosmwasm_schema::write_api;
-use sg721_lockup::contract::{ContractExecMsg, ContractQueryMsg, InstantiateMsg};
+use cw721_lockup::contract::{ContractExecMsg, ContractQueryMsg, InstantiateMsg};
 
 #[cfg(not(tarpaulin_include))]
 fn main() {

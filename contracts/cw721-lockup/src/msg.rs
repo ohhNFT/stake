@@ -5,7 +5,7 @@ use crate::storage::Lockup;
 
 #[cw_serde]
 pub struct CountResponse {
-    pub count: i32,
+    pub count: u128,
 }
 
 #[cw_serde]
@@ -18,4 +18,9 @@ pub struct ConfigResponse {
     pub admin: Addr,
     pub lockup_interval: Timestamp,
     pub collections: Vec<Addr>,
+}
+
+#[cw_serde]
+pub struct ContractTypeResponse {
+    pub contract_type: String,
 }

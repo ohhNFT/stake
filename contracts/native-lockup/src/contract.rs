@@ -7,7 +7,7 @@ use cw_storage_plus::{Item, Map};
 use sylvia::types::{ExecCtx, InstantiateCtx, QueryCtx};
 use sylvia::{contract, entry_points};
 
-use crate::msg::{ConfigResponse, CountResponse};
+use crate::msg::{ConfigResponse, ContractTypeResponse, CountResponse};
 use crate::storage::Lockup;
 
 pub struct NativeLockupContract {
@@ -122,15 +122,15 @@ impl NativeLockupContract {
             Some(lockup) => {
                 let mut new_lockup = lockup;
                 new_lockup.amount += ctx.info.funds[0].amount;
-                new_lockup.locked_until = new_lockup
-                    .locked_until
-                    .plus_seconds(lockup_interval.seconds());
+                new_lockup.locked_until =
+                    ctx.env.block.time.plus_seconds(lockup_interval.seconds());
                 self.lockup
                     .save(ctx.deps.storage, ctx.info.sender.clone(), &new_lockup)?;
             }
             None => {
                 let lockup = Lockup::new(
                     ctx.info.funds[0].amount,
+                    ctx.env.block.time,
                     ctx.env.block.time.plus_seconds(lockup_interval.seconds()),
                 );
 
@@ -183,7 +183,11 @@ impl NativeLockupContract {
                 ctx.deps.storage,
                 ctx.info.sender.clone(),
                 |lockup| match lockup {
-                    Some(lockup) => Ok(Lockup::new(lockup.amount - amount, lockup.locked_until)),
+                    Some(lockup) => Ok(Lockup::new(
+                        lockup.amount - amount,
+                        lockup.locked_since,
+                        lockup.locked_until,
+                    )),
                     None => Err(StdError::generic_err("Lockup not found")),
                 },
             )?;
@@ -214,6 +218,13 @@ impl NativeLockupContract {
         let count = lockups.iter().sum::<u128>();
 
         Ok(CountResponse { count })
+    }
+
+    #[msg(query)]
+    fn contract_type(&self, _ctx: QueryCtx) -> StdResult<ContractTypeResponse> {
+        Ok(ContractTypeResponse {
+            contract_type: "native".to_string(),
+        })
     }
 
     #[msg(query)]

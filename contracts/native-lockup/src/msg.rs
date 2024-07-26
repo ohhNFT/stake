@@ -12,3 +12,8 @@ pub struct ConfigResponse {
     pub lockup_interval: Timestamp,
     pub token: String,
 }
+
+#[cw_serde]
+pub struct ContractTypeResponse {
+    pub contract_type: String,
+}

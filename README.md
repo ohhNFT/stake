@@ -163,7 +163,7 @@ Key is of type `Addr`
 }
 ```
 
-### SG721 Lockup
+### CW721 Lockup
 
 ```rust
 {
