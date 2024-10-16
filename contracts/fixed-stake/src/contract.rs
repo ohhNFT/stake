@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use cosmwasm_std::{
     coin, ensure, ensure_eq, Addr, BankMsg, Decimal, Response, StdError, StdResult, SubMsg,
     Timestamp, Uint128,
@@ -65,14 +63,13 @@ impl FixedStakeContract {
 
         // Query `contract_type` from lockup_contract to verify validity
         let query_msg = native_lockup::contract::QueryMsg::ContractType {};
-        let contract_type_response: native_lockup::msg::ContractTypeResponse = ctx
+        let contract_type_response: cw2::ContractVersion = ctx
             .deps
             .querier
             .query_wasm_smart(lockup_contract.clone(), &query_msg)
             .map_err(|error| error)?;
 
-        if contract_type_response.contract_type != "native"
-            && contract_type_response.contract_type != "cw721"
+        if contract_type_response.contract != "native" && contract_type_response.contract != "cw721"
         {
             return Err(StdError::generic_err("Invalid lockup contract type"));
         }
@@ -138,14 +135,14 @@ impl FixedStakeContract {
 
         // Make `contract_type` query to lockup_contract
         let query_msg = cw721_lockup::contract::QueryMsg::ContractType {};
-        let contract_type_response: cw721_lockup::msg::ContractTypeResponse = ctx
+        let contract_type_response: cw2::ContractVersion = ctx
             .deps
             .querier
             .query_wasm_smart(lockup_contract.clone(), &query_msg)
             .map_err(|error| error)?;
 
         let (lockup, count, claimer_token_id): (LockupInfo, u128, String) =
-            match contract_type_response.contract_type.as_str() {
+            match contract_type_response.contract.as_str() {
                 "native" => {
                     // Verify that claimer.0 is the sender
                     ensure_eq!(
@@ -236,24 +233,30 @@ impl FixedStakeContract {
             return Err(StdError::generic_err("Distribution interval not reached"));
         };
 
-        let time_factor = (Decimal::from_str(&ctx.env.block.time.seconds().to_string())?
-            - Decimal::from_str(&last_claim.seconds().to_string())?)
-            / Decimal::from_str(&distribution_interval.seconds().to_string())?;
+        let time =
+            Decimal::from_atomics(ctx.env.block.time.seconds(), 0).unwrap_or(Decimal::zero());
+        let last_claim = Decimal::from_atomics(last_claim.seconds(), 0).unwrap_or(Decimal::zero());
+        let distribution_interval =
+            Decimal::from_atomics(distribution_interval.seconds(), 0).unwrap_or(Decimal::zero());
 
+        println!("time: {}", time);
+        println!("last_claim: {}", last_claim);
+        println!("distribution_interval: {}", distribution_interval);
+
+        let time_factor = (time - last_claim) / distribution_interval;
         let modulated_time_factor =
-            ((Decimal::from_str(&ctx.env.block.time.seconds().to_string())?
-                - Decimal::from_str(&last_claim.seconds().to_string())?)
-                % Decimal::from_str(&distribution_interval.seconds().to_string())?)
-                / Decimal::from_str(&distribution_interval.seconds().to_string())?;
+            ((time - last_claim) % distribution_interval) / distribution_interval;
 
-        let reward_factor = Decimal::from_str(&total_rewards.to_string())?
-            / ((Decimal::from_str(&end_time.seconds().to_string())?
-                - Decimal::from_str(&start_time.seconds().to_string())?)
-                / Decimal::from_str(&distribution_interval.seconds().to_string())?)
-            / Decimal::from_str(&count.to_string())?;
+        let total_rewards = Decimal::from_atomics(total_rewards, 0).unwrap_or(Decimal::zero());
+        let end_time = Decimal::from_atomics(end_time.seconds(), 0).unwrap_or(Decimal::zero());
+        let start_time = Decimal::from_atomics(start_time.seconds(), 0).unwrap_or(Decimal::zero());
+        let count = Decimal::from_atomics(count, 0).unwrap_or(Decimal::zero());
 
-        let reward = Decimal::from((time_factor - modulated_time_factor) * reward_factor)
-            * Decimal::from_str(&lockup.amount.to_string())?;
+        let reward_factor =
+            total_rewards / ((end_time - start_time) / distribution_interval) / count;
+        let reward = (time_factor - modulated_time_factor)
+            * reward_factor
+            * Decimal::from_atomics(lockup.amount, 0).unwrap_or(Decimal::zero());
 
         let msg = BankMsg::Send {
             to_address: ctx.info.sender.to_string(),

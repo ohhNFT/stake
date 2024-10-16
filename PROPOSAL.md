@@ -1,14 +1,18 @@
-# Upload Stake721
+# Upload OhhStake
 
-We are proposing to upload the code for the Stake721 suite of hard staking contracts for OhhNFT.
+We are proposing to upload the code for the OhhStake suite of hard staking contracts for Ohh.com.
 
-The source code is available at: https://github.com/OhhNFT/stake721
+The source code is available at: https://github.com/OhhNFT/stake
 
 ## Contracts
 
 ### CW721 Lockup
 
 This contract will hold CW721/SG721 NFTs for a set lockup period then allow withdrawals. NFTs can be deposited by simply sending them to the contract.
+
+### CW721 Frac Lockup
+
+This contract will hold a pool of CW721/SG721 NFTs that can be redeemed at any time and by anyone for a set amount of tokens. NFTs can be deposited by simply sending them to the contract, and will yield a set amount of tokens.
 
 ### Native Lockup
 
@@ -22,7 +26,7 @@ This contract will distribute rewards over set intervals and over a set period o
 
 ### CW721-based Stake
 
-Stake contracts linked to a CW721 Lockup contract require users to provide the collection address and token ID when claiming rewards, as so:
+Stake contracts linked to a CW721 Lockup or Frac Lockup contract require users to provide the collection address and token ID when claiming rewards, as so:
 
 ```json
 {
@@ -48,13 +52,13 @@ Stake contracts linked to a Native Lockup contract only require users to provide
 
 ### Native Lockup
 
-- Code ID: `4402`
-- Contract: `stars1nrmmqrghd77t3vd52hnl4rphvqxaqmx0vh8yl6hrrk2n4vevvkms4jmye5`
+- Code ID: ``
+- Contract: ``
 
 ### Fixed Stake
 
-- Code ID: `4403`
-- Contract: `stars1xz9r5f7858vjya6fzk68qmdsx4h70gjaqhe02l88t8ats2y20shqfsc65p`
+- Code ID: ``
+- Contract: ``
 
 ### SHA256 checksums
 

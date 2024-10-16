@@ -2,13 +2,15 @@ use cosmwasm_std::{
     coin, ensure, ensure_eq, Addr, BankMsg, Response, StdError, StdResult, SubMsg, Timestamp,
     Uint128,
 };
+use cw2::ContractVersion;
 use cw_storage_plus::{Item, Map};
 
 use sylvia::types::{ExecCtx, InstantiateCtx, QueryCtx};
 use sylvia::{contract, entry_points};
 
-use crate::msg::{ConfigResponse, ContractTypeResponse, CountResponse};
+use crate::msg::{ConfigResponse, CountResponse};
 use crate::storage::Lockup;
+use crate::{ACTOR_ID, VERSION};
 
 pub struct NativeLockupContract {
     pub(crate) admin: Item<'static, Addr>,
@@ -34,11 +36,15 @@ impl NativeLockupContract {
         &self,
         ctx: InstantiateCtx,
         token: String,
-        lockup_interval: Timestamp,
+        lockup_interval: Option<Timestamp>,
     ) -> StdResult<Response> {
         self.token.save(ctx.deps.storage, &token)?;
-        self.lockup_interval
-            .save(ctx.deps.storage, &lockup_interval)?;
+        self.lockup_interval.save(
+            ctx.deps.storage,
+            &lockup_interval
+                .or(Some(Timestamp::from_seconds(0)))
+                .unwrap(),
+        )?;
         self.admin.save(ctx.deps.storage, &ctx.info.sender)?;
 
         Ok(Response::new())
@@ -68,8 +74,7 @@ impl NativeLockupContract {
     fn update_config(
         &self,
         ctx: ExecCtx,
-        token: String,
-        lockup_interval: Timestamp,
+        lockup_interval: Option<Timestamp>,
     ) -> StdResult<Response> {
         // Admin only
         let old_admin = self.admin.load(ctx.deps.storage).unwrap();
@@ -78,16 +83,25 @@ impl NativeLockupContract {
             ctx.info.sender,
             StdError::generic_err("Unauthorized")
         );
+
         // Save the new config
-        self.token.save(ctx.deps.storage, &token)?;
-        self.lockup_interval
-            .save(ctx.deps.storage, &lockup_interval)?;
+        self.lockup_interval.save(
+            ctx.deps.storage,
+            &lockup_interval
+                .or(Some(Timestamp::from_seconds(0)))
+                .unwrap(),
+        )?;
 
         Ok(Response::new()
             .add_attribute("method", "update_config")
             .add_attribute("contract_address", ctx.env.contract.address.to_string())
-            .add_attribute("token", token)
-            .add_attribute("lockup_interval", lockup_interval.to_string()))
+            .add_attribute(
+                "lockup_interval",
+                lockup_interval
+                    .or(Some(Timestamp::from_seconds(0)))
+                    .unwrap()
+                    .to_string(),
+            ))
     }
 
     #[msg(exec)]
@@ -100,6 +114,13 @@ impl NativeLockupContract {
         ensure!(
             ctx.info.funds[0].amount > Uint128::zero(),
             StdError::generic_err("Funds sent must be greater than 0")
+        );
+
+        // Verify that only one token type was sent
+        ensure_eq!(
+            ctx.info.funds.len(),
+            1,
+            StdError::generic_err("Only one token type can be sent")
         );
 
         // Verify that the funds sent are in the correct token
@@ -163,6 +184,12 @@ impl NativeLockupContract {
             StdError::generic_err("Lockup period has not passed")
         );
 
+        // If the amount requested is higher than the value of the lockup, return an error
+        ensure!(
+            amount.is_none() || amount.unwrap() <= lockup.amount,
+            StdError::generic_err("Amount requested is higher than the lockup value")
+        );
+
         let token = self.token.load(ctx.deps.storage)?;
 
         // If there is no amount specified, send the full amount
@@ -221,9 +248,10 @@ impl NativeLockupContract {
     }
 
     #[msg(query)]
-    fn contract_type(&self, _ctx: QueryCtx) -> StdResult<ContractTypeResponse> {
-        Ok(ContractTypeResponse {
-            contract_type: "native".to_string(),
+    fn contract_type(&self, _ctx: QueryCtx) -> StdResult<ContractVersion> {
+        Ok(ContractVersion {
+            contract: ACTOR_ID.to_string(),
+            version: VERSION.to_string(),
         })
     }
 

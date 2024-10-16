@@ -19,8 +19,3 @@ pub struct ConfigResponse {
     pub lockup_interval: Timestamp,
     pub collections: Vec<Addr>,
 }
-
-#[cw_serde]
-pub struct ContractTypeResponse {
-    pub contract_type: String,
-}

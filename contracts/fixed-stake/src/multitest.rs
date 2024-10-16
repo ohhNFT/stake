@@ -63,7 +63,7 @@ fn setup_native_contracts() -> App {
     // Set up NativeLockup contract
     let lockup_id = router.store_code(contract_native_lockup());
     let msg = native_lockup::contract::InstantiateMsg {
-        lockup_interval: Timestamp::from_seconds(3600),
+        lockup_interval: Some(Timestamp::from_seconds(3600)),
         token: "ustars".to_string(),
     };
 
@@ -128,7 +128,7 @@ fn setup_cw721_contracts() -> App {
         .unwrap();
     let lockup_id = router.store_code(contract_cw721_lockup());
     let msg = cw721_lockup::contract::InstantiateMsg {
-        lockup_interval: Timestamp::from_seconds(3600),
+        lockup_interval: Some(Timestamp::from_seconds(3600)),
         collections: vec![cw721_addr.to_string()],
     };
 
@@ -148,7 +148,7 @@ fn setup_cw721_contracts() -> App {
     };
 
     router
-        .instantiate_contract(stake_id, admin.clone(), &msg, &[], "LOCKUP", None)
+        .instantiate_contract(stake_id, admin.clone(), &msg, &[], "STAKE", None)
         .unwrap();
 
     // Admin send 100 ustars to contract
@@ -181,7 +181,10 @@ fn proper_native_initialization() {
     setup_native_contracts();
     println!("{:?}", Timestamp::from_seconds(3600).to_string());
     println!("{:?}", Timestamp::from_seconds(1721962842).to_string());
-    println!("{:?}", Timestamp::from_seconds(1721962842).plus_days(7).to_string())
+    println!(
+        "{:?}",
+        Timestamp::from_seconds(1721962842).plus_days(7).to_string()
+    )
 }
 
 #[test]

@@ -2,6 +2,7 @@ use cosmwasm_std::{
     ensure, ensure_eq, to_json_binary, Addr, Response, StdError, StdResult, SubMsg, Timestamp,
     WasmMsg,
 };
+use cw2::ContractVersion;
 use cw_storage_plus::{IndexedMap, Item, MultiIndex};
 
 use sylvia::types::{ExecCtx, InstantiateCtx, QueryCtx};
@@ -9,8 +10,9 @@ use sylvia::{contract, entry_points};
 
 use cw721::{Cw721ExecuteMsg, Cw721QueryMsg, OwnerOfResponse as Cw721OwnerOfResponse};
 
-use crate::msg::{ConfigResponse, ContractTypeResponse, CountResponse, LockupsReponse};
+use crate::msg::{ConfigResponse, CountResponse, LockupsReponse};
 use crate::storage::{Lockup, LockupIndexes};
+use crate::{ACTOR_ID, VERSION};
 
 pub struct Cw721LockupContract {
     pub(crate) admin: Item<'static, Addr>,
@@ -49,20 +51,37 @@ impl Cw721LockupContract {
     fn instantiate(
         &self,
         ctx: InstantiateCtx,
-        lockup_interval: Timestamp,
+        lockup_interval: Option<Timestamp>,
         collections: Vec<String>,
     ) -> StdResult<Response> {
-        let collections: Vec<Addr> = collections
+        let collections: Result<Vec<Addr>, StdError> = collections
             .into_iter()
-            .map(|addr| ctx.deps.api.addr_validate(&addr).unwrap())
+            .map(|addr| {
+                ctx.deps
+                    .api
+                    .addr_validate(&addr)
+                    .map_err(|_| StdError::generic_err("Invalid collection address"))
+            })
             .collect();
 
-        self.lockup_interval
-            .save(ctx.deps.storage, &lockup_interval)?;
-        self.collections.save(ctx.deps.storage, &collections)?;
-        self.admin.save(ctx.deps.storage, &ctx.info.sender)?;
+        match collections {
+            Ok(valid_collections) => {
+                self.lockup_interval.save(
+                    ctx.deps.storage,
+                    &lockup_interval
+                        .or(Some(Timestamp::from_seconds(0)))
+                        .unwrap(),
+                )?;
+                self.collections
+                    .save(ctx.deps.storage, &valid_collections)?;
+                self.admin.save(ctx.deps.storage, &ctx.info.sender)?;
 
-        Ok(Response::new())
+                Ok(Response::new())
+            }
+            Err(err) => {
+                return Err(err);
+            }
+        }
     }
 
     #[msg(exec)]
@@ -90,7 +109,7 @@ impl Cw721LockupContract {
     fn update_config(
         &self,
         ctx: ExecCtx,
-        lockup_interval: Timestamp,
+        lockup_interval: Option<Timestamp>,
         collections: Vec<String>,
     ) -> StdResult<Response> {
         // Admin only
@@ -108,14 +127,24 @@ impl Cw721LockupContract {
             .collect();
 
         // Save the new config
-        self.lockup_interval
-            .save(ctx.deps.storage, &lockup_interval)?;
+        self.lockup_interval.save(
+            ctx.deps.storage,
+            &lockup_interval
+                .or(Some(Timestamp::from_seconds(0)))
+                .unwrap(),
+        )?;
         self.collections.save(ctx.deps.storage, &collections)?;
 
         Ok(Response::new()
             .add_attribute("method", "update_config")
             .add_attribute("contract_address", ctx.env.contract.address.to_string())
-            .add_attribute("lockup_interval", lockup_interval.to_string())
+            .add_attribute(
+                "lockup_interval",
+                lockup_interval
+                    .or(Some(Timestamp::from_seconds(0)))
+                    .unwrap()
+                    .to_string(),
+            )
             .add_attribute(
                 "collections",
                 collections
@@ -202,7 +231,13 @@ impl Cw721LockupContract {
             .prefix(lockup_key.clone())
             .range(ctx.deps.storage, None, None, cosmwasm_std::Order::Ascending)
             .collect::<StdResult<Vec<_>>>()?;
-        let lockup = lockup_data.first().unwrap();
+
+        let lockup = match lockup_data.first() {
+            Some(lockup) => lockup,
+            None => {
+                return Err(StdError::generic_err("Lockup entry not found"));
+            }
+        };
 
         // Verify that the sender is the owner of the NFT
         ensure_eq!(
@@ -249,9 +284,10 @@ impl Cw721LockupContract {
     }
 
     #[msg(query)]
-    fn contract_type(&self, _ctx: QueryCtx) -> StdResult<ContractTypeResponse> {
-        Ok(ContractTypeResponse {
-            contract_type: "cw721".to_string(),
+    fn contract_type(&self, _ctx: QueryCtx) -> StdResult<ContractVersion> {
+        Ok(ContractVersion {
+            contract: ACTOR_ID.to_string(),
+            version: VERSION.to_string(),
         })
     }
 
@@ -271,7 +307,12 @@ impl Cw721LockupContract {
             .prefix(lockup_key.clone())
             .range(ctx.deps.storage, None, None, cosmwasm_std::Order::Ascending)
             .collect::<StdResult<Vec<_>>>()?;
-        let lockup = lockup_data.first().unwrap();
+        let lockup = match lockup_data.first() {
+            Some(lockup) => lockup,
+            None => {
+                return Err(StdError::generic_err("Lockup entry not found"));
+            }
+        };
         Ok(lockup.1.clone())
     }
 
