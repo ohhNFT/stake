@@ -1,6 +1,10 @@
 # OhhSTAKE Spec
 
-**ohhstake** is a Stargaze smart contract aimed at DAOs and NFT communities to allow for token ownership-based reward distribution with both fixed & inflationary models.
+Copyright © 2024 OhhNFT — All Rights Reserved
+
+[![Rust](https://github.com/ohhNFT/sg721-stake/actions/workflows/rust.yml/badge.svg)](https://github.com/ohhNFT/sg721-stake/actions/workflows/rust.yml)
+
+**ohhnft-stake** is a Stargaze smart contract aimed at DAOs and NFT communities to allow for token ownership-based reward distribution with both fixed & inflationary models.
 
 ```mermaid
 flowchart
