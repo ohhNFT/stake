@@ -1,0 +1,14 @@
+{
+  "stargaze-testnet": {
+    "elgafar-1": {
+      "code_ids": {
+        "cw721_base": 4680,
+        "frac_lockup": 4681
+      },
+      "default": {
+        "cw721_base": "stars144sy4djug0hqwrlpr58jhfxk4ym2lzys569lcnjm73clmcryhflsn4runs",
+        "frac_lockup": "stars138ld6fhw3nv233krwwy36t8j3t4payx055xzfm9yy0mv8t2up25qqttnse"
+      }
+    }
+  }
+}

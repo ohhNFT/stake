@@ -8,21 +8,13 @@ use cw_orch::prelude::*;
 use cw_orch_osmosis_test_tube::OsmosisTestTube;
 use frac_lockup::{
     msg::{ConfigResponse, LockupsReponse},
-    storage::{CollectionInput, Lockup},
+    storage::CollectionInput,
 };
-use osmosis_test_tube::{
-    osmosis_std::types::{
-        cosmos::{app::v1alpha1::Config, base::v1beta1::Coin},
-        cosmwasm::wasm::v1::{
-            MsgExecuteContract, MsgExecuteContractResponse, MsgInstantiateContract,
-            MsgInstantiateContractResponse,
-        },
-        osmosis::tokenfactory::v1beta1::{
-            MsgChangeAdmin, MsgChangeAdminResponse, MsgCreateDenom, MsgCreateDenomResponse,
-            MsgMint, MsgMintResponse,
-        },
+use osmosis_test_tube::osmosis_std::types::{
+    cosmwasm::wasm::v1::{MsgInstantiateContract, MsgInstantiateContractResponse},
+    osmosis::tokenfactory::v1beta1::{
+        MsgChangeAdmin, MsgChangeAdminResponse, MsgCreateDenom, MsgCreateDenomResponse,
     },
-    TokenFactory,
 };
 use osmosis_test_tube::{Account, SigningAccount};
 use prost::Message;
@@ -79,14 +71,6 @@ fn setup_contracts() -> cw_orch::anyhow::Result<TestState> {
     )?;
 
     let denom = format!("factory/{}/{}", admin_address.to_string(), SUBDENOM);
-
-    let msg = FracInstantiateMsg {
-        collections: vec![CollectionInput {
-            address: cw721_base_contract.addr_str()?,
-            tokens: 1_000_000,
-        }],
-        denom: denom.clone(),
-    };
 
     let frac_lockup_contract = FracLockup::new(chain.clone());
     let frac_lockup_code_id = frac_lockup_contract.upload()?.uploaded_code_id()?;
