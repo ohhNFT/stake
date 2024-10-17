@@ -239,10 +239,6 @@ impl FixedStakeContract {
         let distribution_interval =
             Decimal::from_atomics(distribution_interval.seconds(), 0).unwrap_or(Decimal::zero());
 
-        println!("time: {}", time);
-        println!("last_claim: {}", last_claim);
-        println!("distribution_interval: {}", distribution_interval);
-
         let time_factor = (time - last_claim) / distribution_interval;
         let modulated_time_factor =
             ((time - last_claim) % distribution_interval) / distribution_interval;

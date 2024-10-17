@@ -32,9 +32,9 @@ pub fn contract_cw721_lockup() -> Box<dyn Contract<Empty>> {
 
 pub fn contract_stake() -> Box<dyn Contract<Empty>> {
     let contract = ContractWrapper::new(
-        crate::contract::entry_points::execute,
-        crate::contract::entry_points::instantiate,
-        crate::contract::entry_points::query,
+        fixed_stake::contract::entry_points::execute,
+        fixed_stake::contract::entry_points::instantiate,
+        fixed_stake::contract::entry_points::query,
     );
     Box::new(contract)
 }
@@ -73,7 +73,7 @@ fn setup_native_contracts() -> App {
 
     // Set up FixedStake contract
     let stake_id = router.store_code(contract_stake());
-    let msg = crate::contract::InstantiateMsg {
+    let msg = fixed_stake::contract::InstantiateMsg {
         lockup_contract: NATIVE_LOCKUP.to_string(),
         distribution_interval: Timestamp::from_seconds(3600),
         reward_denom: "ustars".to_string(),
@@ -138,7 +138,7 @@ fn setup_cw721_contracts() -> App {
 
     // Set up FixedStake contract
     let stake_id = router.store_code(contract_stake());
-    let msg = crate::contract::InstantiateMsg {
+    let msg = fixed_stake::contract::InstantiateMsg {
         lockup_contract: CW721_LOCKUP.to_string(),
         distribution_interval: Timestamp::from_seconds(3600),
         reward_denom: "ustars".to_string(),
@@ -179,12 +179,6 @@ fn add_block_time(router: &mut App, seconds: u64) {
 #[test]
 fn proper_native_initialization() {
     setup_native_contracts();
-    println!("{:?}", Timestamp::from_seconds(3600).to_string());
-    println!("{:?}", Timestamp::from_seconds(1721962842).to_string());
-    println!(
-        "{:?}",
-        Timestamp::from_seconds(1721962842).plus_days(7).to_string()
-    )
 }
 
 #[test]
@@ -250,7 +244,7 @@ fn native_deposit_and_claim() {
         .unwrap();
 
     // User claims rewards before they are available
-    let msg = crate::contract::ExecMsg::ClaimRewards {
+    let msg = fixed_stake::contract::ExecMsg::ClaimRewards {
         of: (USER.to_string(), String::from("")),
     };
     let err = router
@@ -291,7 +285,7 @@ fn cw721_deposit_and_claim() {
     );
 
     // User claims rewards before they are available
-    let msg = crate::contract::ExecMsg::ClaimRewards {
+    let msg = fixed_stake::contract::ExecMsg::ClaimRewards {
         of: (CW721.to_string(), token_id.to_string()),
     };
     let err = router

@@ -15,9 +15,9 @@ pub fn contract_cw721() -> Box<dyn Contract<Empty>> {
 
 pub fn contract_lockup() -> Box<dyn Contract<Empty>> {
     let contract = ContractWrapper::new(
-        crate::contract::entry_points::execute,
-        crate::contract::entry_points::instantiate,
-        crate::contract::entry_points::query,
+        cw721_lockup::contract::entry_points::execute,
+        cw721_lockup::contract::entry_points::instantiate,
+        cw721_lockup::contract::entry_points::query,
     );
     Box::new(contract)
 }
@@ -55,7 +55,7 @@ fn setup_contracts() -> App {
 
     // Set up Cw721Lockup contract
     let lockup_id = router.store_code(contract_lockup());
-    let msg = crate::contract::InstantiateMsg {
+    let msg = cw721_lockup::contract::InstantiateMsg {
         lockup_interval: Some(Timestamp::from_seconds(3600)),
         collections: vec![cw721_addr.to_string()],
     };
@@ -109,8 +109,9 @@ fn proper_initialization() {
 #[test]
 fn try_query_config() {
     let router = setup_contracts();
-    let msg = crate::contract::QueryMsg::Config {};
-    let res: crate::msg::ConfigResponse = router.wrap().query_wasm_smart(LOCKUP, &msg).unwrap();
+    let msg = cw721_lockup::contract::QueryMsg::Config {};
+    let res: cw721_lockup::msg::ConfigResponse =
+        router.wrap().query_wasm_smart(LOCKUP, &msg).unwrap();
     assert_eq!(res.admin, ADMIN);
     assert_eq!(res.lockup_interval, Timestamp::from_seconds(3600));
     assert_eq!(res.collections.len(), 1);
@@ -128,11 +129,12 @@ fn try_deposit_cw721() {
     mint_cw721(&mut router, user.clone(), "1");
     send_cw721(&mut router, user.clone(), contract, token_id);
 
-    let msg = crate::contract::QueryMsg::LockupsByOwner {
+    let msg = cw721_lockup::contract::QueryMsg::LockupsByOwner {
         owner: user.to_string(),
     };
 
-    let res: crate::msg::LockupsReponse = router.wrap().query_wasm_smart(LOCKUP, &msg).unwrap();
+    let res: cw721_lockup::msg::LockupsReponse =
+        router.wrap().query_wasm_smart(LOCKUP, &msg).unwrap();
     assert_eq!(res.lockups.len(), 1);
     assert_eq!(res.lockups[0].owner, user);
     assert_eq!(res.lockups[0].collection_address, Addr::unchecked(CW721));
@@ -151,14 +153,15 @@ fn try_withdraw_cw721() {
     mint_cw721(&mut router, user.clone(), "1");
     send_cw721(&mut router, user.clone(), contract.clone(), token_id);
 
-    let msg = crate::contract::QueryMsg::LockupsByOwner {
+    let msg = cw721_lockup::contract::QueryMsg::LockupsByOwner {
         owner: user.to_string(),
     };
 
-    let res: crate::msg::LockupsReponse = router.wrap().query_wasm_smart(LOCKUP, &msg).unwrap();
+    let res: cw721_lockup::msg::LockupsReponse =
+        router.wrap().query_wasm_smart(LOCKUP, &msg).unwrap();
     assert_eq!(res.lockups.len(), 1);
 
-    let msg = crate::contract::ExecMsg::Withdraw {
+    let msg = cw721_lockup::contract::ExecMsg::Withdraw {
         collection_address: CW721.to_string(),
         token_id: token_id.to_string(),
     };
@@ -187,10 +190,11 @@ fn try_withdraw_cw721() {
         .execute_contract(user.clone(), contract, &msg, &[])
         .unwrap();
 
-    let msg = crate::contract::QueryMsg::LockupsByOwner {
+    let msg = cw721_lockup::contract::QueryMsg::LockupsByOwner {
         owner: user.to_string(),
     };
 
-    let res: crate::msg::LockupsReponse = router.wrap().query_wasm_smart(LOCKUP, &msg).unwrap();
+    let res: cw721_lockup::msg::LockupsReponse =
+        router.wrap().query_wasm_smart(LOCKUP, &msg).unwrap();
     assert_eq!(res.lockups.len(), 0);
 }

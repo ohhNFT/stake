@@ -5,9 +5,9 @@ use cw_multi_test::{App, Contract, ContractWrapper, Executor};
 
 pub fn contract_lockup() -> Box<dyn Contract<Empty>> {
     let contract = ContractWrapper::new(
-        crate::contract::entry_points::execute,
-        crate::contract::entry_points::instantiate,
-        crate::contract::entry_points::query,
+        native_lockup::contract::entry_points::execute,
+        native_lockup::contract::entry_points::instantiate,
+        native_lockup::contract::entry_points::query,
     );
     Box::new(contract)
 }
@@ -32,7 +32,7 @@ fn setup_contracts() -> App {
 
     // Set up Cw721Lockup contract
     let lockup_id = router.store_code(contract_lockup());
-    let msg = crate::contract::InstantiateMsg {
+    let msg = native_lockup::contract::InstantiateMsg {
         lockup_interval: Some(Timestamp::from_seconds(3600)),
         token: "ustars".to_string(),
     };
@@ -59,8 +59,9 @@ fn proper_initialization() {
 #[test]
 fn try_query_config() {
     let router = setup_contracts();
-    let msg = crate::contract::QueryMsg::Config {};
-    let res: crate::msg::ConfigResponse = router.wrap().query_wasm_smart(LOCKUP, &msg).unwrap();
+    let msg = native_lockup::contract::QueryMsg::Config {};
+    let res: native_lockup::msg::ConfigResponse =
+        router.wrap().query_wasm_smart(LOCKUP, &msg).unwrap();
     assert_eq!(res.admin, ADMIN);
     assert_eq!(res.lockup_interval, Timestamp::from_seconds(3600));
     assert_eq!(res.token, "ustars");
@@ -86,7 +87,7 @@ fn try_deposit() {
         .unwrap();
 
     // User attempts to deposit 0 ustars
-    let msg = crate::contract::ExecMsg::Deposit {};
+    let msg = native_lockup::contract::ExecMsg::Deposit {};
     let err = router
         .execute_contract(user.clone(), Addr::unchecked(LOCKUP), &msg, &[])
         .unwrap_err();
@@ -96,16 +97,17 @@ fn try_deposit() {
     );
 
     // User deposits 500 ustars
-    let msg = crate::contract::ExecMsg::Deposit {};
+    let msg = native_lockup::contract::ExecMsg::Deposit {};
     router
         .execute_contract(user.clone(), Addr::unchecked(LOCKUP), &msg, &deposit_amount)
         .unwrap();
 
     // Query the lockup
-    let query_msg = crate::contract::QueryMsg::Lockup {
+    let query_msg = native_lockup::contract::QueryMsg::Lockup {
         address: user.to_string(),
     };
-    let res: crate::storage::Lockup = router.wrap().query_wasm_smart(LOCKUP, &query_msg).unwrap();
+    let res: native_lockup::storage::Lockup =
+        router.wrap().query_wasm_smart(LOCKUP, &query_msg).unwrap();
     assert_eq!(res.amount, deposit_amount[0].amount);
 
     // Deposit 500 more ustars
@@ -114,7 +116,8 @@ fn try_deposit() {
         .unwrap();
 
     // Query the lockup
-    let res: crate::storage::Lockup = router.wrap().query_wasm_smart(LOCKUP, &query_msg).unwrap();
+    let res: native_lockup::storage::Lockup =
+        router.wrap().query_wasm_smart(LOCKUP, &query_msg).unwrap();
     assert_eq!(res.amount.u128(), deposit_amount[0].amount.u128() * 2);
 }
 
@@ -139,20 +142,21 @@ fn try_withdraw() {
         .unwrap();
 
     // User deposits 1000 ustars
-    let msg = crate::contract::ExecMsg::Deposit {};
+    let msg = native_lockup::contract::ExecMsg::Deposit {};
     router
         .execute_contract(user.clone(), Addr::unchecked(LOCKUP), &msg, &deposit_amount)
         .unwrap();
 
     // Query the lockup
-    let query_msg = crate::contract::QueryMsg::Lockup {
+    let query_msg = native_lockup::contract::QueryMsg::Lockup {
         address: user.to_string(),
     };
-    let res: crate::storage::Lockup = router.wrap().query_wasm_smart(LOCKUP, &query_msg).unwrap();
+    let res: native_lockup::storage::Lockup =
+        router.wrap().query_wasm_smart(LOCKUP, &query_msg).unwrap();
     assert_eq!(res.amount, deposit_amount[0].amount);
 
     // Withdraw before lockup period has passed
-    let msg = crate::contract::ExecMsg::Withdraw {
+    let msg = native_lockup::contract::ExecMsg::Withdraw {
         amount: Some(withdraw_amount),
     };
     let err = router
@@ -172,14 +176,15 @@ fn try_withdraw() {
         .unwrap();
 
     // Query the lockup
-    let res: crate::storage::Lockup = router.wrap().query_wasm_smart(LOCKUP, &query_msg).unwrap();
+    let res: native_lockup::storage::Lockup =
+        router.wrap().query_wasm_smart(LOCKUP, &query_msg).unwrap();
     assert_eq!(
         res.amount.u128(),
         deposit_amount[0].amount.u128() - withdraw_amount.u128()
     );
 
     // Withdraw the remaining amount
-    let msg = crate::contract::ExecMsg::Withdraw { amount: None };
+    let msg = native_lockup::contract::ExecMsg::Withdraw { amount: None };
     router
         .execute_contract(user.clone(), Addr::unchecked(LOCKUP), &msg, &[])
         .unwrap();
@@ -187,7 +192,7 @@ fn try_withdraw() {
     // Verify that querying the lockup returns an error
     // let err = router
     //     .wrap()
-    //     .query_wasm_smart::<crate::storage::Lockup>(LOCKUP, &query_msg)
+    //     .query_wasm_smart::<native_lockup::storage::Lockup>(LOCKUP, &query_msg)
     //     .unwrap_err();
     // assert_eq!(
     //     err,

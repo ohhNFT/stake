@@ -1,6 +1,6 @@
 [workspace]
 name     = "ohh-stake"
-members  = ["contracts/*"]
+members  = ["contracts/*", "tests"]
 resolver = "2"
 
 [workspace.package]
