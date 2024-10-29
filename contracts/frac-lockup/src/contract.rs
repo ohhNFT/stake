@@ -11,7 +11,7 @@ use sylvia::{contract, entry_points};
 
 use cw721::{Cw721ExecuteMsg, Cw721QueryMsg, OwnerOfResponse as Cw721OwnerOfResponse};
 
-use crate::helpers::mint_to;
+use crate::helpers::{burn, mint_to};
 use crate::msg::{ConfigResponse, CountResponse, LockupsReponse};
 use crate::storage::{Collection, CollectionInput, Lockup, LockupIndexes};
 use crate::{ACTOR_ID, VERSION};
@@ -196,10 +196,6 @@ impl FracLockupContract {
             .save(ctx.deps.storage, "lockup__depositor", &lockup)?;
 
         // Mint tokens to depositor
-        let mint_amount = Coin {
-            denom: self.denom.load(ctx.deps.storage)?,
-            amount: collection.tokens.clone(),
-        };
         let mint_msg = mint_to(
             ctx.env.clone(),
             depositor.to_string(),
@@ -288,10 +284,7 @@ impl FracLockupContract {
         self.lockup.remove(ctx.deps.storage, &lockup.0)?;
 
         // Burn the tokens
-        let burn_msg = BankMsg::Send {
-            to_address: ctx.env.contract.address.to_string(),
-            amount: vec![ctx.info.funds[0].clone()],
-        };
+        let burn_msg = burn(ctx.env.clone(), ctx.info.funds[0].clone());
 
         // Send the NFT to the message sender
         let msg = Cw721ExecuteMsg::TransferNft {

@@ -3330,6 +3330,7 @@ dependencies = [
  "osmosis-test-tube",
  "prost 0.12.6",
  "prost-types 0.12.6",
+ "rand",
 ]
 
 [[package]]
