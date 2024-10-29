@@ -2,12 +2,16 @@
   "stargaze-testnet": {
     "elgafar-1": {
       "code_ids": {
-        "cw721_base": 4680,
-        "frac_lockup": 4681
+        "cw721_base": 4716,
+        "frac_lockup": 4717
+      },
+      "custom": {
+        "denom": "factory/stars1u668fd0rm8qcx6zdw8gm50y33qfm3dap2ecv2x/KUPZQ",
+        "subdenom": "KUPZQ"
       },
       "default": {
-        "cw721_base": "stars144sy4djug0hqwrlpr58jhfxk4ym2lzys569lcnjm73clmcryhflsn4runs",
-        "frac_lockup": "stars138ld6fhw3nv233krwwy36t8j3t4payx055xzfm9yy0mv8t2up25qqttnse"
+        "cw721_base": "stars1chl9d5ukq800rxlkfqnwa8pwkrq03w5m2djs6wtklafy7q9qkjks9mhyr5",
+        "frac_lockup": "stars17w5ehwdrrpvqnujfyq24g2fs3wnvedasz3swmjr26dlfmstfmfjsanpe7y"
       }
     }
   }

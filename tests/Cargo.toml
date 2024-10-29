@@ -41,3 +41,4 @@ native-lockup = { path = "../contracts/native-lockup" }
 frac-lockup = { path = "../contracts/frac-lockup" }
 
 fixed-stake = { path = "../contracts/fixed-stake" }
+rand = "0.8.5"

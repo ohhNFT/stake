@@ -8,6 +8,8 @@ use osmosis_test_tube::osmosis_std::types::{
 };
 use prost::Message;
 use prost_types::Any;
+use rand::Rng;
+use std::iter;
 
 use tests::interface::cw721_base::{
     Cw721Base, Cw721ExecuteMsg, InstantiateMsg as Cw721InstantiateMsg,
@@ -15,6 +17,13 @@ use tests::interface::cw721_base::{
 use tests::interface::frac_lockup::{FracLockup, InstantiateMsg as FracInstantiateMsg};
 
 use tests::chains::ELGAFAR_1;
+
+fn generate_str(len: usize) -> String {
+    const CHARSET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    let mut rng = rand::thread_rng();
+    let one_char = || CHARSET[rng.gen_range(0..CHARSET.len())] as char;
+    iter::repeat_with(one_char).take(len).collect()
+}
 
 pub fn main() {
     dotenv::dotenv().unwrap();
@@ -24,6 +33,10 @@ pub fn main() {
     assert!(daemon_res.is_ok());
     let daemon = daemon_res.unwrap();
 
+    let subdenom = generate_str(5);
+    let set_res = daemon.state().set("custom", "subdenom", subdenom.clone());
+    assert!(set_res.is_ok());
+
     let cw721_base = Cw721Base::new(daemon.clone());
 
     let cw721_upload_res = cw721_base.upload();
@@ -32,7 +45,7 @@ pub fn main() {
     let cw721_init_res = cw721_base.instantiate(
         &Cw721InstantiateMsg {
             name: String::from("WAU Test Collection"),
-            symbol: String::from("WAU"),
+            symbol: subdenom.clone(),
             minter: daemon.sender_addr().to_string(),
         },
         Some(&daemon.sender_addr()),
@@ -45,7 +58,7 @@ pub fn main() {
             type_url: MsgCreateDenom::TYPE_URL.to_string(),
             value: MsgCreateDenom {
                 sender: daemon.sender_addr().to_string(),
-                subdenom: String::from("wau"),
+                subdenom: subdenom.clone(),
             }
             .encode_to_vec(),
         }],
@@ -53,15 +66,14 @@ pub fn main() {
     );
     assert!(create_denom_res.is_ok());
 
-    let denom = format!("factory/{}/{}", daemon.sender_addr().to_string(), "wau");
+    let denom = format!(
+        "factory/{}/{}",
+        daemon.sender_addr().to_string(),
+        subdenom.clone()
+    );
 
-    let msg = FracInstantiateMsg {
-        collections: vec![CollectionInput {
-            address: cw721_base.addr_str().unwrap(),
-            tokens: 1_000_000,
-        }],
-        denom: denom.clone(),
-    };
+    let set_res = daemon.state().set("custom", "denom", denom.clone());
+    assert!(set_res.is_ok());
 
     let frac_lockup = FracLockup::new(daemon.clone());
 

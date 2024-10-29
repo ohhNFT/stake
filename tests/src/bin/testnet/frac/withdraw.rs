@@ -26,6 +26,11 @@ pub fn main() {
     assert!(daemon_res.is_ok());
     let daemon = daemon_res.unwrap();
 
+    let custom_state = daemon.state().get("custom");
+    assert!(custom_state.is_ok());
+    let state = custom_state.unwrap();
+    let denom = state["denom"].as_str().unwrap();
+
     let frac_lockup_address_res = daemon.state().get_address("frac_lockup");
     assert!(frac_lockup_address_res.is_ok());
     let frac_lockup_address = frac_lockup_address_res.unwrap();
@@ -45,7 +50,7 @@ pub fn main() {
     let exec_res = frac_lockup.execute(
         &msg,
         Some(&[Coin {
-            denom: "factory/stars1u668fd0rm8qcx6zdw8gm50y33qfm3dap2ecv2x/wau".to_string(),
+            denom: denom.to_string(),
             amount: 1000000u128.into(),
         }]),
     );
